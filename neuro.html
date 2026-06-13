@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroLearn — Adaptive Learning, Wired Like Your Brain</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div id="landingScreen" class="screen screen-landing">
+    <canvas id="neuralCanvas" aria-hidden="true"></canvas>
+
+    <div class="hero-wrapper">
+      <div class="landing-content">
+        <div class="landing-logo-wrap" aria-hidden="true">
+          <svg class="synapse-mark" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="28" cy="28" r="27" stroke="url(#sg)" stroke-width="1.5"/>
+            <circle cx="28" cy="14" r="4" fill="url(#sg)"/>
+            <circle cx="42" cy="36" r="4" fill="url(#sg)"/>
+            <circle cx="14" cy="36" r="4" fill="url(#sg)"/>
+            <line x1="28" y1="18" x2="14" y2="32" stroke="url(#sg)" stroke-width="1.2"/>
+            <line x1="28" y1="18" x2="42" y2="32" stroke="url(#sg)" stroke-width="1.2"/>
+            <line x1="16"  y1="36" x2="40" y2="36" stroke="url(#sg)" stroke-width="1.2"/>
+            <defs>
+              <linearGradient id="sg" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#a78bfa"/>
+                <stop offset="1" stop-color="#60a5fa"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <h1 class="landing-title"><span class="title-word" style="--d:0ms">NeuroLearn</span></h1>
+        <p class="landing-tagline"><span class="title-word" style="--d:120ms">Adaptive Learning, Wired Like Your Brain.</span></p>
+
+        <div class="feature-pills" role="list">
+          <span class="pill" role="listitem" style="--d:240ms"><span class="pill-dot" style="background:#a78bfa"></span>Event-Driven AI</span>
+          <span class="pill" role="listitem" style="--d:320ms"><span class="pill-dot" style="background:#60a5fa"></span>STDP Learning</span>
+          <span class="pill" role="listitem" style="--d:400ms"><span class="pill-dot" style="background:#34d399"></span>Live Emotion Detection</span>
+          <span class="pill" role="listitem" style="--d:480ms"><span class="pill-dot" style="background:#f472b6"></span>14 CSE Subjects</span>
+        </div>
+        
+        <button class="cta-btn title-word" style="--d:560ms" id="enterBtn">
+          Start Learning
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="margin-left:8px;">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        
+        <a href="#features" class="scroll-down-hint title-word" style="--d:700ms">Learn how it works ↓</a>
+      </div>
+    </div>
+
+    <!-- ── EXTENDED FEATURES SECTION ── -->
+    <div id="features" class="features-section">
+      <h2 class="features-title">Driven by Neuromorphic Principles</h2>
+      <p class="features-subtitle">Experience an AI tutor that processes information just like the human brain—efficient, adaptive, and event-driven.</p>
+      
+      <!-- Grid 1: Core Tech -->
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="fc-icon">🧠</div>
+          <h3>Event-Driven AI</h3>
+          <p>Traditional AI wastes energy polling constantly. NeuroLearn only processes data when a "spike" (user action) occurs, mimicking asynchronous power-saving architectures.</p>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">📷</div>
+          <h3>Live Emotion Tracking</h3>
+          <p>Your webcam acts as a dynamic sensor. Micro-expressions of confusion or focus instantly trigger inhibitory or excitatory spikes to our learning model.</p>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">⚡</div>
+          <h3>STDP Learning</h3>
+          <p>Spike-Timing-Dependent Plasticity ensures the AI adapts to you. Stay engaged, and the AI goes deeper. Look confused, and it instantly simplifies.</p>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">📚</div>
+          <h3>14 CSE Subjects</h3>
+          <p>From Data Structures to Theory of Computation, our optimized LLM prompts deliver highly accurate, engineering-focused curriculum.</p>
+        </div>
+      </div>
+
+      <!-- Section 2: How it works (The Pipeline) -->
+      <div class="how-it-works">
+        <h2 class="features-title">The Learning Pipeline</h2>
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="step-number">1</div>
+            <h4>Detect</h4>
+            <p>Advanced facial recognition continuously monitors your engagement levels locally directly in your browser.</p>
+          </div>
+          <div class="timeline-step">
+            <div class="step-number">2</div>
+            <h4>Spike</h4>
+            <p>Changes in expression fire neural spikes, dynamically updating your real-time synaptic engagement score.</p>
+          </div>
+          <div class="timeline-step">
+            <div class="step-number">3</div>
+            <h4>Adapt</h4>
+            <p>The AI instantly alters its explanation depth, tone, and pacing based on your current cognitive load.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom CTA -->
+      <div class="bottom-cta">
+        <button class="cta-btn" onclick="App.enterApp()">
+          Launch NeuroLearn →
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="appScreen" class="screen screen-app" aria-hidden="true">
+    <aside class="sidebar" role="navigation" aria-label="Subject navigation">
+      <div class="sidebar-brand">
+        <div class="brand-mark" aria-hidden="true">N</div>
+        <div>
+          <div class="brand-name">NeuroLearn</div>
+          <div class="brand-sub">CSE · AI Tutor</div>
+        </div>
+      </div>
+
+      <p class="sidebar-section-label">subjects</p>
+      <div class="topic-list" id="topicList" role="list"></div>
+
+      <div class="synapse-monitor" aria-live="polite" aria-label="Synapse activity monitor">
+        <div class="monitor-header">
+          <span class="monitor-title">Synapse Activity</span>
+          <span class="monitor-eng" id="engPct">0%</span>
+        </div>
+        <div class="spike-graph" id="spikeGraph" aria-hidden="true" role="img"></div>
+        <div class="eng-track"><div class="eng-fill" id="engFill" style="width:0%"></div></div>
+        <div class="eng-status" id="engStatus">awaiting signal</div>
+        <div class="spike-counters">
+          <div class="spike-type excitatory"><span class="spike-dot"></span><span>Excitatory</span><span class="spike-count" id="excCount">0</span></div>
+          <div class="spike-type inhibitory"><span class="spike-dot"></span><span>Inhibitory</span><span class="spike-count" id="inhCount">0</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-panel" role="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="back-btn" onclick="App.goHome()" title="Go back to Home">← Back</button>
+          <span class="topic-display" id="topicDisplay">Select a subject</span>
+          <span class="depth-badge" id="depthBadge">beginner</span>
+        </div>
+        <div class="topbar-right">
+          <div class="emotion-status" id="emotionStatus" title="Emotion detection status">
+            <span class="emotion-dot" id="emotionDot"></span>
+            <span class="emotion-label" id="emotionLabel">camera off</span>
+          </div>
+          <select class="depth-select" id="depthSelect" aria-label="Explanation depth" onchange="App.onDepthChange()">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+          <button class="icon-btn" id="cameraBtn" onclick="App.toggleCamera()" title="Toggle emotion detection">📷</button>
+        </div>
+      </header>
+
+      <div class="chat-area" id="chatArea" role="log" aria-live="polite">
+        <div class="empty-hint" id="emptyHint">
+          <div class="empty-icon" aria-hidden="true">⬡</div>
+          <h2 class="empty-title">Pick a subject to begin</h2>
+          <p class="empty-sub">NeuroLearn adapts in real time based on your engagement and facial expressions.</p>
+        </div>
+      </div>
+
+      <div class="signals-strip" id="signalsStrip" style="display:none" role="toolbar">
+        <span class="signals-label">quick signals</span>
+        <button class="sig-btn" onclick="App.sendSignal('confused')">😵 confused</button>
+        <button class="sig-btn" onclick="App.sendSignal('too fast')">⚡ too fast</button>
+        <button class="sig-btn" onclick="App.sendSignal('got it, move on')">✅ got it</button>
+        <button class="sig-btn" onclick="App.sendSignal('give me a code example')">💻 code example</button>
+        <button class="sig-btn" onclick="App.sendSignal('go deeper technically')">🔬 go deeper</button>
+        <button class="sig-btn" onclick="App.sendSignal('give me a practice problem')">📝 practice Q</button>
+      </div>
+
+      <div class="input-row">
+        <textarea class="chat-input" id="chatInput" placeholder="Ask anything about the topic…" rows="1" onkeydown="App.handleKey(event)" oninput="App.autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="App.sendMessage()" disabled>Send</button>
+      </div>
+    </main>
+
+    <div class="camera-panel" id="cameraPanel" style="display:none">
+      <div class="cam-header">
+        <span>Emotion Detector</span>
+        <button class="cam-close" onclick="App.toggleCamera()">✕</button>
+      </div>
+      <video id="camVideo" autoplay muted playsinline style="display:none"></video>
+      <canvas id="camCanvas" class="cam-canvas" width="200" height="150"></canvas>
+      <div class="cam-emotion-row">
+        <span class="cam-emotion-label">Expression:</span>
+        <span class="cam-emotion-value" id="camEmotionValue">—</span>
+      </div>
+      <div class="cam-spike-label" id="camSpikeLabel">—</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
