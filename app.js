@@ -263,15 +263,20 @@ Rules: Under 160 words. Use code blocks. Be direct. End with one question.`;
       parts: [{ text: m.content }]
     }));
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
-
-    const res = await fetch(url, {
+    const url = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`
+      : `/api/tutor`;
+   const fetchConfig = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemText }] },
         contents: geminiMessages.slice(-12),
         generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+      }),
+    };
+
+    const res = await fetch(url, fetchConfig);
       }),
     });
 
