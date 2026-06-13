@@ -1,6 +1,15 @@
+/**
+ * ============================================================
+ * NeuroLearn — app.js
+ * Adaptive Learning, Wired Like Your Brain.
+ * ============================================================
+ */
+
 'use strict';
 
-/* ── 1. NEURAL CANVAS (Background Animation) ── */
+/* ════════════════════════════════════════════════════════════
+   1. NEURAL CANVAS (Background Animation)
+════════════════════════════════════════════════════════════ */
 const NeuralCanvas = (() => {
   let canvas, ctx, nodes, raf;
   const NODE_COUNT = 55;
@@ -77,7 +86,9 @@ const NeuralCanvas = (() => {
 })();
 
 
-/* ── 2. STDP ENGINE (Neuromorphic Logic) ── */
+/* ════════════════════════════════════════════════════════════
+   2. STDP ENGINE (Neuromorphic Core)
+════════════════════════════════════════════════════════════ */
 const STDPEngine = (() => {
   const EXCITATORY  = 'excitatory';
   const INHIBITORY  = 'inhibitory';
@@ -135,10 +146,13 @@ const STDPEngine = (() => {
   return { fire, onUpdate, startDecay, stopDecay, getScore, EXCITATORY, INHIBITORY };
 })();
 
-/* ── 3. FACE ENGINE (Emotion Detection) ── */
+
+/* ════════════════════════════════════════════════════════════
+   3. FACE ENGINE (Emotion Detection)
+════════════════════════════════════════════════════════════ */
 const FaceEngine = (() => {
   const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
-  const POLL_MS   = 2500; // Balanced timer
+  const POLL_MS   = 8000; // Throttled to preserve API rate limits
 
   let video;
   let isRunning    = false;
@@ -177,7 +191,6 @@ const FaceEngine = (() => {
       await new Promise(res => { 
         video.onloadedmetadata = () => { 
           video.play(); 
-          // CRITICAL FIX: Explicitly set dimensions so the AI can map the face
           video.width = video.videoWidth;
           video.height = video.videoHeight;
           res(); 
@@ -213,7 +226,6 @@ const FaceEngine = (() => {
     }
 
     try {
-      // CRITICAL FIX: Increased inputSize to 224 so the AI isn't blind
       const result = await faceapi
         .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224 }))
         .withFaceExpressions();
@@ -230,18 +242,25 @@ const FaceEngine = (() => {
         if (onExpressionCb) onExpressionCb({ expression: dominant, spikeType, intensity });
       }
     } catch (e) { 
-      // Silently catch errors so the loop doesn't crash
+      // Catch silently to keep polling loop alive
     }
     
-    // Queue the next frame ONLY after this one is entirely finished
     scheduleNextPoll();
   }
 
   return { start, stop, onExpression };
 })();
-/* ── 4. TUTOR API (Gemini Integration) ── */
+
+
+/* ════════════════════════════════════════════════════════════
+   4. TUTOR API (Groq Llama 3.3 Integration)
+════════════════════════════════════════════════════════════ */
 const TutorAPI = (() => {
-  let apiKey = '';
+  // Looks for environmental variable fallback first to keep keys hidden on Git
+  let apiKey = window.process?.env?.GROQ_API_KEY || '';
+
+  function setKey(k) { apiKey = k; }
+  function hasKey()  { return apiKey.length > 20; } 
 
   function buildSystem(topicLabel, depth, engScore) {
     const engNote =
@@ -251,40 +270,54 @@ const TutorAPI = (() => {
       'Student is actively learning — match current depth.';
 
     return `You are NeuroLearn, an AI tutor for CSE students.
-Topic: ${topicLabel}. Depth: ${depth}. Engagement: ${engScore}/100. ${engNote}
+Topic: ${topicLabel}. Depth: ${depth}. Engagement: ${engScore}/100.
+${engNote}
 Rules: Under 160 words. Use code blocks. Be direct. End with one question.`;
   }
 
   async function call(messages, topicLabel, depth) {
+    if (!hasKey()) throw new Error('NO_KEY');
+
     const engScore = STDPEngine.getScore();
     const systemText = buildSystem(topicLabel, depth, engScore);
-    const geminiMessages = messages.map(m => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }]
-    }));
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+    const formattedMessages = [
+      { role: 'system', content: systemText },
+      ...messages.map(m => ({ role: m.role, content: m.content }))
+    ];
+
+    const url = 'https://api.groq.com/openai/v1/chat/completions';
 
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemText }] },
-        contents: geminiMessages.slice(-12),
-        generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+        model: 'llama-3.3-70b-versatile',
+        messages: formattedMessages.slice(-12),
+        max_tokens: 800,
+        temperature: 0.7
       }),
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    }
+
     const data = await res.json();
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response received.';
+    return data?.choices?.[0]?.message?.content ?? 'No response received.';
   }
 
-  return { call };
+  return { setKey, hasKey, call };
 })();
 
 
-/* ── 5. UI HELPERS ── */
+/* ════════════════════════════════════════════════════════════
+   5. UI HELPERS
+════════════════════════════════════════════════════════════ */
 const UI = (() => {
   let msgId = 0, toastTimer;
 
@@ -299,247 +332,3 @@ const UI = (() => {
     row.id = id;
     row.innerHTML = `
       <div class="avatar ${role === 'tutor' ? 'avatar-tutor' : 'avatar-user'}">${role === 'tutor' ? 'NL' : 'You'}</div>
-      <div class="bubble ${role === 'tutor' ? 'bubble-tutor' : 'bubble-user'}${loading ? ' bubble-loading' : ''}">
-        ${formatText(text)}
-      </div>`;
-    chatArea.appendChild(row);
-    chatArea.scrollTop = chatArea.scrollHeight;
-    return id;
-  }
-
-  function updateBubble(id, text) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const bubble = el.querySelector('.bubble');
-    bubble.classList.remove('bubble-loading');
-    bubble.innerHTML = formatText(text);
-    document.getElementById('chatArea').scrollTop = 999999;
-  }
-
-  function formatText(text) {
-    text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => `<pre><code>${escHtml(code.trim())}</code></pre>`);
-    text = text.replace(/`([^`]+)`/g, (_, c) => `<code>${escHtml(c)}</code>`);
-    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    return text.replace(/\n/g, '<br>');
-  }
-
-  function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  function toast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
-  }
-
-  function updateMonitor({ engagementScore, excCount, inhCount, graphHeads }) {
-    document.getElementById('engPct').textContent  = engagementScore + '%';
-    const fill = document.getElementById('engFill');
-    fill.style.width = engagementScore + '%';
-
-    if (engagementScore < 20) { fill.style.background = '#3d4560'; document.getElementById('engStatus').textContent = 'no signal'; }
-    else if (engagementScore < 45) { fill.style.background = '#fbbf24'; document.getElementById('engStatus').textContent = 'low engagement'; }
-    else if (engagementScore < 70) { fill.style.background = '#a78bfa'; document.getElementById('engStatus').textContent = 'active learning'; }
-    else { fill.style.background = '#34d399'; document.getElementById('engStatus').textContent = 'deep focus ◆'; }
-
-    document.getElementById('excCount').textContent = excCount;
-    document.getElementById('inhCount').textContent = inhCount;
-
-    const graph = document.getElementById('spikeGraph');
-    graph.innerHTML = '';
-    for (let i = 0; i < 20; i++) {
-      const bar = document.createElement('div');
-      bar.className = 'spike-bar';
-      const entry = graphHeads[i];
-      if (entry && entry.h > 0) {
-        bar.style.height = entry.h + 'px';
-        const cls = entry.type === STDPEngine.EXCITATORY ? 'exc-active' : 'inh-active';
-        bar.classList.add(cls);
-        setTimeout(() => bar.classList.remove(cls), 800);
-      } else { bar.style.height = '3px'; }
-      graph.appendChild(bar);
-    }
-  }
-
-  return { addBubble, updateBubble, toast, updateMonitor };
-})();
-
-
-/* ── 6. DATA CONTEXT ── */
-const TOPICS = [
-  { id: 'dsa', label: 'Data Structures & Algos', icon: '🌳' }, { id: 'os', label: 'Operating Systems', icon: '⚙️' },
-  { id: 'dbms', label: 'DBMS & SQL', icon: '🗄️' }, { id: 'cn', label: 'Computer Networks', icon: '🌐' },
-  { id: 'oops', label: 'OOP & Design Patterns', icon: '🧩' }, { id: 'se', label: 'Software Engineering', icon: '📐' },
-  { id: 'co', label: 'Computer Organisation', icon: '🔌' }, { id: 'toc', label: 'Theory of Computation', icon: '∑' },
-  { id: 'ml', label: 'Machine Learning', icon: '🤖' }, { id: 'web', label: 'Web Dev (HTML/CSS/JS)', icon: '🕸️' },
-  { id: 'python', label: 'Python Programming', icon: '🐍' }, { id: 'cpp', label: 'C++ & STL', icon: '⚡' },
-  { id: 'snn', label: 'Neuromorphic / SNNs', icon: '🧠' }, { id: 'crypto', label: 'Cryptography & Security', icon: '🔐' },
-];
-
-const SIGNAL_PROMPTS = {
-  'confused': 'Student is confused. Re-explain simply under 100 words.',
-  'too fast': 'Student says too fast. Break it down step-by-step under 100 words.',
-  'got it, move on': 'Student understood. Introduce next logical concept.',
-  'give me a code example': 'Give a practical code example.',
-  'go deeper technically': 'Go deeper technically (time complexity, edge cases).',
-  'give me a practice problem': 'Give one practice problem.',
-};
-
-
-/* ── 7. APP CONTROLLER ── */
-const App = (() => {
-  let currentTopic = null, convHistory = [], isLoading = false, cameraActive = false;
-
-  function init() {
-    buildTopicList();
-    NeuralCanvas.init();
-    STDPEngine.onUpdate(UI.updateMonitor);
-    STDPEngine.startDecay();
-
-    FaceEngine.onExpression(({ expression, spikeType, intensity }) => {
-      STDPEngine.fire(intensity, spikeType);
-      document.getElementById('camEmotionValue').textContent = expression;
-      const isInhibitory = spikeType === STDPEngine.INHIBITORY;
-      const labelEl = document.getElementById('camSpikeLabel');
-      labelEl.textContent = isInhibitory ? '↓ Inhibitory spike' : '↑ Excitatory spike';
-      labelEl.style.color = isInhibitory ? 'var(--red)' : 'var(--green)';
-
-      if (isInhibitory && currentTopic && !isLoading && STDPEngine.getScore() < 35) {
-        sendSignal('confused');
-      }
-    });
-
-    document.getElementById('enterBtn').addEventListener('click', enterApp);
-  }
-
-  function enterApp() {
-    const landing = document.getElementById('landingScreen');
-    const app     = document.getElementById('appScreen');
-    landing.classList.add('leaving');
-    app.setAttribute('aria-hidden', 'false');
-    setTimeout(() => { app.classList.add('active'); NeuralCanvas.stop(); }, 400);
-    setTimeout(() => { landing.style.display = 'none'; }, 750);
-  }
-
-  function goHome() {
-    const landing = document.getElementById('landingScreen');
-    const app     = document.getElementById('appScreen');
-    app.classList.remove('active');
-    app.setAttribute('aria-hidden', 'true');
-    landing.style.display = 'block';
-    setTimeout(() => { landing.classList.remove('leaving'); NeuralCanvas.init(); }, 50);
-  }
-
-  function buildTopicList() {
-    const list = document.getElementById('topicList');
-    TOPICS.forEach(topic => {
-      const btn = document.createElement('button');
-      btn.className = 'topic-btn';
-      btn.id = 'tb-' + topic.id;
-      btn.innerHTML = `<span class="topic-icon">${topic.icon}</span><span>${topic.label}</span>`;
-      btn.addEventListener('click', () => selectTopic(topic));
-      list.appendChild(btn);
-    });
-  }
-
-  function selectTopic(topic) {
-    if (currentTopic?.id === topic.id) return;
-    currentTopic = topic;
-    convHistory  = [];
-    document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tb-' + topic.id).classList.add('active');
-    document.getElementById('topicDisplay').textContent = topic.label;
-    document.getElementById('signalsStrip').style.display = 'flex';
-    document.getElementById('sendBtn').disabled = false;
-    document.getElementById('chatArea').innerHTML = '';
-    STDPEngine.fire(0.9, STDPEngine.EXCITATORY);
-    startSession(topic);
-  }
-
-  async function startSession(topic) {
-    const depth = document.getElementById('depthSelect').value;
-    document.getElementById('depthBadge').textContent = depth;
-    convHistory = [{ role: 'user', content: `Start tutoring "${topic.label}" at ${depth} level.` }];
-    await fetchTutor();
-  }
-
-  async function sendMessage() {
-    const input = document.getElementById('chatInput');
-    const text  = input.value.trim();
-    if (!text || isLoading) return;
-    input.value = '';
-    input.style.height = 'auto';
-    STDPEngine.fire(1.0, STDPEngine.EXCITATORY);
-    UI.addBubble('user', text);
-    convHistory.push({ role: 'user', content: text });
-    await fetchTutor();
-  }
-
-  async function sendSignal(sig) {
-    if (isLoading || !currentTopic) return;
-    const spikeType = (sig === 'confused' || sig === 'too fast') ? STDPEngine.INHIBITORY : STDPEngine.EXCITATORY;
-    STDPEngine.fire(0.8, spikeType);
-    UI.addBubble('user', sig);
-    convHistory.push({ role: 'user', content: SIGNAL_PROMPTS[sig] || sig });
-    await fetchTutor();
-  }
-
-  async function fetchTutor() {
-    if (isLoading) return;
-    isLoading = true;
-    document.getElementById('sendBtn').disabled = true;
-    const loadId = UI.addBubble('tutor', 'Thinking…', true);
-    const depth  = document.getElementById('depthSelect').value;
-
-    try {
-      const reply = await TutorAPI.call(convHistory, currentTopic.label, depth);
-      UI.updateBubble(loadId, reply);
-      convHistory.push({ role: 'assistant', content: reply });
-      STDPEngine.fire(0.55, STDPEngine.EXCITATORY);
-    } catch (e) {
-      UI.updateBubble(loadId, `⚠️ Error: ${e.message}`);
-    }
-    isLoading = false;
-    document.getElementById('sendBtn').disabled = false;
-  }
-
-  function onDepthChange() {
-    document.getElementById('depthBadge').textContent = document.getElementById('depthSelect').value;
-    if (currentTopic) STDPEngine.fire(0.5, STDPEngine.EXCITATORY);
-  }
-
-  async function toggleCamera() {
-    const panel = document.getElementById('cameraPanel');
-    const dot   = document.getElementById('emotionDot');
-    const label = document.getElementById('emotionLabel');
-
-    if (cameraActive) {
-      FaceEngine.stop();
-      cameraActive = false;
-      panel.style.display = 'none';
-      dot.className = 'emotion-dot';
-      label.textContent = 'camera off';
-    } else {
-      dot.className = 'emotion-dot detecting';
-      label.textContent = 'starting…';
-      const ok = await FaceEngine.start();
-      if (ok) {
-        cameraActive = true;
-        panel.style.display = 'block';
-        dot.className = 'emotion-dot active';
-        label.textContent = 'detecting';
-        UI.toast('Emotion detection active');
-      } else {
-        dot.className = 'emotion-dot';
-        label.textContent = 'unavailable';
-      }
-    }
-  }
-
-  function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
-  function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
-
-  document.addEventListener('DOMContentLoaded', init);
-  return { sendMessage, sendSignal, onDepthChange, toggleCamera, handleKey, autoResize, goHome };
-})();
