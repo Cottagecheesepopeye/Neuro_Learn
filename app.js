@@ -241,7 +241,7 @@ const FaceEngine = (() => {
 })();
 /* ── 4. TUTOR API (Gemini Integration) ── */
 const TutorAPI = (() => {
-  let apiKey = 'AQ.Ab8RN6JVEDHpvV7rRS1TNOhdXqBNXmmKkf30mYW6kFHmHxaKmA';
+  let apiKey = '';
 
   function buildSystem(topicLabel, depth, engScore) {
     const engNote =
