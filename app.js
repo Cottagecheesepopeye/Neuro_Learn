@@ -257,7 +257,7 @@ const FaceEngine = (() => {
 ════════════════════════════════════════════════════════════ */
 const TutorAPI = (() => {
   // Looks for environmental variable fallback first to keep keys hidden on Git
-  let apiKey = window.process?.env?.GROQ_API_KEY || '';
+  let apiKey = '';
 
   function setKey(k) { apiKey = k; }
   function hasKey()  { return apiKey.length > 20; } 
