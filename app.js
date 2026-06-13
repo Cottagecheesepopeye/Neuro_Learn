@@ -241,7 +241,7 @@ const FaceEngine = (() => {
 })();
 /* ── 4. TUTOR API (Gemini Integration) ── */
 const TutorAPI = (() => {
-  let apiKey = '';
+  let apiKey = 'AQ.Ab8RN6JVEDHpvV7rRS1TNOhdXqBNXmmKkf30mYW6kFHmHxaKmA';
 
   function buildSystem(topicLabel, depth, engScore) {
     const engNote =
@@ -263,20 +263,15 @@ Rules: Under 160 words. Use code blocks. Be direct. End with one question.`;
       parts: [{ text: m.content }]
     }));
 
-    const url = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`
-      : `/api/tutor`;
-   const fetchConfig = {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemText }] },
         contents: geminiMessages.slice(-12),
         generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
-      }),
-    };
-
-    const res = await fetch(url, fetchConfig);
       }),
     });
 
@@ -546,5 +541,5 @@ const App = (() => {
   function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 
   document.addEventListener('DOMContentLoaded', init);
-  return { sendMessage, sendSignal, onDepthChange, toggleCamera, handleKey, autoResize, goHome, enterApp };
+  return { sendMessage, sendSignal, onDepthChange, toggleCamera, handleKey, autoResize, goHome };
 })();
