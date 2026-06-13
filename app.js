@@ -1,6 +1,15 @@
+/**
+ * ============================================================
+ * NeuroLearn — app.js
+ * Adaptive Learning, Wired Like Your Brain.
+ * ============================================================
+ */
+
 'use strict';
 
-/* ── 1. NEURAL CANVAS (Background Animation) ── */
+/* ════════════════════════════════════════════════════════════
+   1. NEURAL CANVAS (Background Animation)
+════════════════════════════════════════════════════════════ */
 const NeuralCanvas = (() => {
   let canvas, ctx, nodes, raf;
   const NODE_COUNT = 55;
@@ -77,7 +86,9 @@ const NeuralCanvas = (() => {
 })();
 
 
-/* ── 2. STDP ENGINE (Neuromorphic Logic) ── */
+/* ════════════════════════════════════════════════════════════
+   2. STDP ENGINE (Neuromorphic Core)
+════════════════════════════════════════════════════════════ */
 const STDPEngine = (() => {
   const EXCITATORY  = 'excitatory';
   const INHIBITORY  = 'inhibitory';
@@ -136,13 +147,14 @@ const STDPEngine = (() => {
 })();
 
 
-/* ── 3. FACE ENGINE (Emotion Detection) ── */
+/* ════════════════════════════════════════════════════════════
+   3. FACE ENGINE (Emotion Detection)
+════════════════════════════════════════════════════════════ */
 const FaceEngine = (() => {
   const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
   const POLL_MS   = 2500;
 
-  let video, canvas, ctx2d;
-  let pollTimer    = null;
+  let video;
   let isRunning    = false;
   let modelsLoaded = false;
   let onExpressionCb = null;
@@ -161,8 +173,6 @@ const FaceEngine = (() => {
   async function start() {
     if (isRunning) return false;
     video  = document.getElementById('camVideo');
-    canvas = document.getElementById('camCanvas');
-    ctx2d  = canvas.getContext('2d');
 
     if (!modelsLoaded) {
       UI.toast('Loading emotion models… (~3 s)');
@@ -171,16 +181,24 @@ const FaceEngine = (() => {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { width: { ideal: 320 }, height: { ideal: 240 } }, 
+        audio: false 
+      });
+      
       video.srcObject = stream;
       
-      // Explicit play trigger to fix browser autoplay restrictions
       await new Promise(res => { 
-        video.onloadedmetadata = () => { video.play(); res(); }; 
+        video.onloadedmetadata = () => { 
+          video.play(); 
+          video.width = video.videoWidth;
+          video.height = video.videoHeight;
+          res(); 
+        }; 
       });
       
       isRunning = true;
-      pollTimer = setInterval(poll, POLL_MS);
+      scheduleNextPoll(); 
       return true;
     } catch (e) {
       UI.toast('Camera access denied');
@@ -189,7 +207,6 @@ const FaceEngine = (() => {
   }
 
   function stop() {
-    clearInterval(pollTimer);
     isRunning = false;
     if (video && video.srcObject) {
       video.srcObject.getTracks().forEach(t => t.stop());
@@ -197,65 +214,65 @@ const FaceEngine = (() => {
     }
   }
 
+  function scheduleNextPoll() {
+    if (!isRunning) return;
+    setTimeout(poll, POLL_MS);
+  }
+
   async function poll() {
-    if (!isRunning || !video || video.paused || video.videoWidth === 0) return;
+    if (!isRunning || !video || video.paused || video.videoWidth === 0) {
+      scheduleNextPoll();
+      return;
+    }
 
-    ctx2d.save();
-    ctx2d.scale(-1, 1);
-    ctx2d.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-    ctx2d.restore();
-
-    let result;
     try {
-      result = await faceapi
-        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+      const result = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224 }))
         .withFaceExpressions();
-    } catch { return; }
 
-    if (!result) return;
+      if (result) {
+        const exp = result.expressions;
+        const dominant = Object.entries(exp).sort((a, b) => b[1] - a[1])[0][0];
 
-    const exp = result.expressions;
-    const dominant = Object.entries(exp).sort((a, b) => b[1] - a[1])[0][0];
+        const INHIBITORY_EXPRESSIONS = ['confused', 'sad', 'fearful', 'disgusted', 'angry'];
+        const isInhibitory = INHIBITORY_EXPRESSIONS.includes(dominant);
+        const spikeType    = isInhibitory ? STDPEngine.INHIBITORY : STDPEngine.EXCITATORY;
+        const intensity = dominant === 'neutral' ? 0.4 : 0.75;
 
-    const INHIBITORY_EXPRESSIONS = ['confused', 'sad', 'fearful', 'disgusted', 'angry'];
-    const isInhibitory = INHIBITORY_EXPRESSIONS.includes(dominant);
-    const spikeType    = isInhibitory ? STDPEngine.INHIBITORY : STDPEngine.EXCITATORY;
-    const intensity = dominant === 'neutral' ? 0.4 : 0.75;
-
-    if (onExpressionCb) onExpressionCb({ expression: dominant, spikeType, intensity });
+        if (onExpressionCb) onExpressionCb({ expression: dominant, spikeType, intensity });
+      }
+    } catch (e) { 
+      // Silently catch so loop doesn't crash
+    }
+    
+    scheduleNextPoll();
   }
 
   return { start, stop, onExpression };
 })();
 
 
-/* ── 4. TUTOR API (Gemini Integration) ── */
+/* ════════════════════════════════════════════════════════════
+   4. TUTOR API (Powered by Google Gemini REST)
+════════════════════════════════════════════════════════════ */
 const TutorAPI = (() => {
-  // Your exact Google AI Studio key
+  // PASTE YOUR NEW AIza KEY RIGHT HERE 
   let apiKey = 'AIzaSyBZfP-iUUfDrUpTOZfR0XLQtjNe-teal7o';
 
   function setKey(k) { apiKey = k; }
-  function hasKey()  { return apiKey.length > 20; } 
+  function hasKey()  { return apiKey.startsWith('AIza') && apiKey.length > 30; } 
 
   function buildSystem(topicLabel, depth, engScore) {
     const engNote =
-      engScore < 20 ? 'Student seems disengaged — be more energetic, use a surprising hook or analogy.' :
-      engScore < 45 ? 'Student has low engagement — keep it concise, use relatable examples.' :
-      engScore > 70 ? 'Student is highly engaged — go technically deeper, assume comfort with concepts.' :
+      engScore < 20 ? 'Student seems disengaged — be energetic, use a hook.' :
+      engScore < 45 ? 'Student has low engagement — keep it concise.' :
+      engScore > 70 ? 'Student is highly engaged — go technically deeper.' :
       'Student is actively learning — match current depth.';
 
-    return `You are NeuroLearn, a sharp and concise AI tutor for Computer Science Engineering students.
-Current topic: ${topicLabel}.
-Explanation depth: ${depth}.
-Neuromorphic engagement score: ${engScore}/100.
+    return `You are NeuroLearn, an AI tutor for CSE students.
+Topic: ${topicLabel}. Depth: ${depth}. Engagement: ${engScore}/100.
 ${engNote}
-
-Rules:
-- Under 160 words unless showing code.
-- Use triple backtick code blocks with a language tag (e.g. \`\`\`python).
-- Be direct. No filler phrases like "Great question!".
-- End every response with one short question or insight prompt.
-- If engagement is low, simplify. If high, add technical depth.`;
+Rules: Under 160 words. Use code blocks. Be direct. End with one question.`;
   }
 
   async function call(messages, topicLabel, depth) {
@@ -264,39 +281,39 @@ Rules:
     const engScore = STDPEngine.getScore();
     const systemText = buildSystem(topicLabel, depth, engScore);
 
-    // Convert history for the SDK format
     const geminiMessages = messages.map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }]
     }));
 
-    try {
-      // CRITICAL FIX: Dynamically import the official SDK to bypass the REST block
-      const { GoogleGenAI } = await import('https://esm.run/@google/genai');
-      
-      // The SDK automatically knows how to authenticate an AQ. key
-      const ai = new GoogleGenAI({ apiKey: apiKey });
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemText }] },
         contents: geminiMessages.slice(-12),
-        config: {
-          systemInstruction: systemText,
-          maxOutputTokens: 1000,
-          temperature: 0.7
-        }
-      });
-      
-      return response.text;
-      
-    } catch (err) {
-      throw new Error(err.message || 'SDK Error');
+        generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `HTTP ${res.status}`);
     }
+
+    const data = await res.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response received.';
   }
 
   return { setKey, hasKey, call };
 })();
-/* ── 5. UI HELPERS ── */
+
+
+/* ════════════════════════════════════════════════════════════
+   5. UI HELPERS
+════════════════════════════════════════════════════════════ */
 const UI = (() => {
   let msgId = 0, toastTimer;
 
@@ -378,7 +395,9 @@ const UI = (() => {
 })();
 
 
-/* ── 6. DATA CONTEXT ── */
+/* ════════════════════════════════════════════════════════════
+   6. TOPIC LIST & PROMPTS
+════════════════════════════════════════════════════════════ */
 const TOPICS = [
   { id: 'dsa', label: 'Data Structures & Algos', icon: '🌳' }, { id: 'os', label: 'Operating Systems', icon: '⚙️' },
   { id: 'dbms', label: 'DBMS & SQL', icon: '🗄️' }, { id: 'cn', label: 'Computer Networks', icon: '🌐' },
@@ -399,7 +418,9 @@ const SIGNAL_PROMPTS = {
 };
 
 
-/* ── 7. APP CONTROLLER ── */
+/* ════════════════════════════════════════════════════════════
+   7. APP CONTROLLER
+════════════════════════════════════════════════════════════ */
 const App = (() => {
   let currentTopic = null, convHistory = [], isLoading = false, cameraActive = false;
 
@@ -422,7 +443,8 @@ const App = (() => {
       }
     });
 
-    document.getElementById('enterBtn').addEventListener('click', enterApp);
+    const enterBtn = document.getElementById('enterBtn');
+    if(enterBtn) enterBtn.addEventListener('click', enterApp);
   }
 
   function enterApp() {
@@ -445,6 +467,7 @@ const App = (() => {
 
   function buildTopicList() {
     const list = document.getElementById('topicList');
+    if(!list) return;
     TOPICS.forEach(topic => {
       const btn = document.createElement('button');
       btn.className = 'topic-btn';
@@ -510,7 +533,11 @@ const App = (() => {
       convHistory.push({ role: 'assistant', content: reply });
       STDPEngine.fire(0.55, STDPEngine.EXCITATORY);
     } catch (e) {
-      UI.updateBubble(loadId, `⚠️ Error: ${e.message}`);
+      if (e.message.includes('401') || e.message === 'NO_KEY') {
+        UI.updateBubble(loadId, '⚠️ Invalid or missing API key. Please check your app.js file and ensure you are using an AIza key.');
+      } else {
+        UI.updateBubble(loadId, `⚠️ Error: ${e.message}`);
+      }
     }
     isLoading = false;
     document.getElementById('sendBtn').disabled = false;
@@ -530,28 +557,4 @@ const App = (() => {
       FaceEngine.stop();
       cameraActive = false;
       panel.style.display = 'none';
-      dot.className = 'emotion-dot';
-      label.textContent = 'camera off';
-    } else {
-      dot.className = 'emotion-dot detecting';
-      label.textContent = 'starting…';
-      const ok = await FaceEngine.start();
-      if (ok) {
-        cameraActive = true;
-        panel.style.display = 'block';
-        dot.className = 'emotion-dot active';
-        label.textContent = 'detecting';
-        UI.toast('Emotion detection active');
-      } else {
-        dot.className = 'emotion-dot';
-        label.textContent = 'unavailable';
-      }
-    }
-  }
-
-  function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
-  function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
-
-  document.addEventListener('DOMContentLoaded', init);
-  return { sendMessage, sendSignal, onDepthChange, toggleCamera, handleKey, autoResize, goHome };
-})();
+      dot.className = '
