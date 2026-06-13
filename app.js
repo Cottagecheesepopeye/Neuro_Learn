@@ -232,7 +232,7 @@ const FaceEngine = (() => {
 /* ── 4. TUTOR API (Gemini Integration) ── */
 const TutorAPI = (() => {
   // Your exact Google AI Studio key
-  let apiKey = 'AQ.Ab8RN6LZJtmEvYMCcQrpD-C9E5cKgneSQputxaM-VjqVZvvyxg';
+  let apiKey = 'AIzaSyBZfP-iUUfDrUpTOZfR0XLQtjNe-teal7o';
 
   function setKey(k) { apiKey = k; }
   function hasKey()  { return apiKey.length > 20; } 
