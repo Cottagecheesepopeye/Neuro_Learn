@@ -1,5 +1,6 @@
-# NeuroLearn: Emotion-Aware Virtual Learning Assistant
-
+# NeuroLearn: Emotion-Aware Virtual Learning Assistant 
+Made by The No-Brainers
+---
 ## About the Project
 
 Imagine a student spending hours studying online, struggling to understand a concept, feeling frustrated, and slowly losing motivation.
@@ -11,13 +12,21 @@ Unlike traditional learning platforms that treat every student the same, NeuroLe
 
 The project aims to create a learning environment that can adapt to a student's needs by responding to signs of confusion, frustration, stress, or motivation, ultimately improving the overall learning experience.
 
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-success?logo=vercel&style=flat-flat)](https://vercel.com)
+[![Inference Engine](https://img.shields.io/badge/Inference-Groq--Llama--3.3--70B-orange?logo=groq)](https://groq.com)
+[![Core Core](https://img.shields.io/badge/Core-Vanilla%20JS%20%26%20STDP%20Engine-blueviolet)]()
 
+---
+## 🚀 Step-by-Step Installation & Local Setup
 
-## Problem Statement
+Bring the project up in your local environment within 60 seconds:
 
-**Build an AI tutor that adapts explanations based on learner engagement or confusion levels.**
+1. **Clone the Repository:**
+   ```bash
+   git clone [https://github.com/Cottagecheesepopeye/Neuro_Learn.git](https://github.com/Cottagecheesepopeye/Neuro_Learn.git)
+   cd Neuro_Learn
 
-
+---
 
 ## The Problem We Are Solving
 
@@ -30,13 +39,15 @@ Many students face challenges while learning online:
 
 As a result, learning can become less engaging, less interactive, and less effective.
 
-
+---
 
 ## Our Solution
 
 NeuroLearn acts as an intelligent study companion that adapts its support based on a learner's engagement, understanding, and emotional state.
 
 The platform continuously interacts with learners and responds to their learning behavior. Based on the learner's needs, NeuroLearn provides personalized guidance, adaptive explanations, and encouragement to make studying more effective and enjoyable.
+
+---
 
 ### Example Scenarios
 
@@ -46,7 +57,7 @@ The platform continuously interacts with learners and responds to their learning
 
 This creates a more engaging, personalized, and learner-friendly educational experience.
 
-
+---
 
 ## Key Features
 
@@ -70,7 +81,7 @@ The system promotes positive reinforcement to help learners stay focused and con
 
 NeuroLearn encourages continuous improvement by helping learners identify areas that need additional attention.
 
-
+---
 
 ## How It Works
 
@@ -80,7 +91,7 @@ NeuroLearn encourages continuous improvement by helping learners identify areas 
 4. NeuroLearn generates personalized feedback and learning recommendations.
 5. The learner receives guidance tailored to their current learning needs.
 
-
+---
 
 ## Technology Stack
 
@@ -89,23 +100,33 @@ NeuroLearn encourages continuous improvement by helping learners identify areas 
 * HTML
 * CSS
 * JavaScript
+* Groq API hosting Llama 3.3 70B-parameter model
+* WebGL accelerated `face-api.js` fetching localized model bin weights directly from browser cache.
+
+---
 
 ### Planned Technologies
 
-* Python
+* Python integration for a smoother and accurate face detection
 * SQLite / CSV
 * Emotion Analysis Models
 * Personalized Recommendation Engine
+* More subjects
 
-
+---
 
 ### File Description
 
 * **index.html** – Main structure and layout of the application.
+* **`api/tutor.js`** – Secure cloud-side script. Acts as a gatekeeper to hold private environment infrastructure tokens (`GROQ_API_KEY`) safely away from public repository scanners while acting as a high-speed runtime proxy.
 * **styles.css** – Styling, visual design, and animations.
 * **app.js** – Application logic and user interactions.
+  * `NeuralCanvas`: Generates custom asynchronous generative background node animations.
+  * `STDPEngine`: Computes real-time synaptic weight formulas and decay constants.
+  * `FaceEngine`: Hand-throttled polling scheduler managing frame calculations without generating heavy rate-limit faults.
+  * `TutorAPI`: Handles state serialization and protocol translation layers.
 
-
+---
 
 ## Neuromorphic Inspiration
 
@@ -120,7 +141,7 @@ The project follows principles such as:
 
 Rather than treating every learner identically, NeuroLearn aims to create a learning experience that adapts and evolves according to individual needs.
 
-
+---
 
 ## Expected Impact
 
@@ -132,26 +153,24 @@ NeuroLearn aims to:
 * Provide a more supportive digital learning environment.
 * Promote personalized education experiences.
 
-
+---
 
 ## Future Scope
 
 Future enhancements may include:
 
-* Real-time emotion recognition
-* Facial expression analysis
 * Voice-based interaction
 * Multi-language support
 * Learning analytics dashboard
 * Personalized study planning
 * Integration with online education platforms
 
-
+---
 
 ## Team
 
 Developed as a collaborative hackathon project with the vision of making learning more personalized, inclusive, and emotionally intelligent.
-
+---
 
 ## Conclusion
 
