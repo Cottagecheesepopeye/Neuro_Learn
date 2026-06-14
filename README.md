@@ -204,11 +204,3 @@ Developed as a collaborative hackathon project with the vision of making learnin
 NeuroLearn is more than just a virtual tutor. It is a learning companion designed to understand, adapt, and grow with the learner—making education smarter, more engaging, and more human.
 
 We believe the future of education should be both intelligent and empathetic, and NeuroLearn is a step in that direction.
-<img width="1917" height="1090" alt="Screenshot 2026-06-14 140521" src="https://github.com/user-attachments/assets/edd1ce3d-c0ac-42e1-b400-48eac769028f" />
-<img width="1918" height="1087" alt="Screenshot 2026-06-14 140440" src="https://github.com/user-attachments/assets/1847a74d-38e0-46d0-9753-8ae28b36dd15" />
-<img width="1915" height="1085" alt="Screenshot 2026-06-14 140423" src="https://github.com/user-attachments/assets/08898196-2944-4ee8-98c9-c0cc37f32f56" />
-<img width="1918" height="1086" alt="Screenshot 2026-06-14 140309" src="https://github.com/user-attachments/assets/b985b765-e500-471a-aa00-5e0f0b157d72" />
-<img width="1917" height="1081" alt="Screenshot 2026-06-14 140229" src="https://github.com/user-attachments/assets/874ac2d2-2d25-4a43-9edf-a312dc6e7e34" />
-<img width="1918" height="1090" alt="Screenshot 2026-06-14 140648" src="https://github.com/user-attachments/assets/8801d449-c126-432c-aad4-bf476dafab81" />
-<img width="1918" height="1091" alt="Screenshot 2026-06-14 140558" src="https://github.com/user-attachments/assets/0db37c5c-de06-4e52-b09a-c022ebd12125" />
-
