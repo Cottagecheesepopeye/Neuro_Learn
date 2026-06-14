@@ -76,6 +76,8 @@ The platform continuously interacts with learners and responds to their learning
 
 This creates a more engaging, personalized, and learner-friendly educational experience.
 
+<img width="1918" height="1087" alt="image" src="https://github.com/user-attachments/assets/9d6de029-3ec3-45df-b1b9-a140d742812c" />
+
 ---
 
 ## Key Features
@@ -84,9 +86,15 @@ This creates a more engaging, personalized, and learner-friendly educational exp
 
 The platform is designed to recognize learner engagement and emotional cues to provide more personalized support.
 
+<img width="1918" height="1090" alt="image" src="https://github.com/user-attachments/assets/0f88b3be-cee4-4103-a271-97a7e5a9d2d0" />
+
+
 ### Personalized Learning Support
 
 Learning recommendations and explanations can be adapted according to the learner's needs and progress.
+
+<img width="1917" height="1090" alt="image" src="https://github.com/user-attachments/assets/41e86e27-cb70-4924-b8c0-3a40e0c10784" />
+
 
 ### Interactive Virtual Assistant
 
